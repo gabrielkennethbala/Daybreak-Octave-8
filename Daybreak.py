@@ -1,3 +1,4 @@
+# Imports – Bring in cryptographic libraries (AES‑256, scrypt) and PyQt6 for the graphical interface.
 import sys
 import os
 import json
@@ -24,6 +25,8 @@ from PyQt6.QtGui import QPixmap, QColor, QPainter, QPen, QFont
 
 # =============================================================================
 # 0. RESOURCE RESOLVER
+# Resource resolver – Helper function resource_path() that finds images and files correctly whether the app runs as a script or as a compiled .exe.
+# Why it matters – Ensures the logo and background image load reliably on any computer.
 # =============================================================================
 def resource_path(relative_path):
     try:
@@ -34,6 +37,9 @@ def resource_path(relative_path):
 
 # =============================================================================
 # 1. UI: REAL-TIME ENTROPY GAUGE
+# Circular gauge – Draws a ring that fills from 0% to 100% as you type a password.
+# Entropy calculation – Counts character types (lowercase, uppercase, digits, symbols) to estimate password strength.
+# Colour feedback – Red (weak), yellow (moderate), cyan (strong) – gives instant visual feedback.
 # =============================================================================
 class StrengthGauge(QWidget):
     def __init__(self):
@@ -72,6 +78,10 @@ class StrengthGauge(QWidget):
 
 # =============================================================================
 # 2. SECURITY ENGINE (Zero-Knowledge AES-256)
+# Key derivation – Uses scrypt to turn your master password into a secure 32‑byte key (memory‑hard, resistant to brute force).
+# Encryption – Saves the vault to vault.db using AES‑256‑GCM (authenticated encryption – protects both confidentiality and integrity).
+# Emergency backdoors (demo only) – Hardcoded root hash and recovery key allow bypass; clearly labelled as insecure for production.
+# Deterministic generator – Produces the same password from the same seed + master key – useful if you lose the vault but remember the seed.
 # =============================================================================
 class SecurityEngine:
     def __init__(self):
@@ -133,6 +143,11 @@ class SecurityEngine:
 
 # =============================================================================
 # 3. MAIN UI HUB
+# Login window – Username + master password; also offers “ROOT BYPASS” and “Emergency Recovery Key” for demo purposes.
+# Vault tab – Stores two types of entries: Login credentials (app, username, password) and Payment cards (card number, expiry, CVV). All saved entries appear in a list.
+# Generator tab – Allows you to enter a seed (e.g., “Netflix”), choose a length (8–64), and generate a deterministic, strong password. Includes the StrengthGauge for real‑time feedback.
+# Offline mode toggle – Simulates a “read‑only” mode; when offline, you cannot add, modify, or delete entries.
+# Persistent storage – The vault is automatically saved (encrypted) after every change and reloaded when you log in.
 # =============================================================================
 class DaybreakApp(QMainWindow):
     def __init__(self):
